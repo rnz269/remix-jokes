@@ -3,7 +3,7 @@ import { useActionData, json, Link, useSearchParams } from 'remix';
 
 import { db } from '~/utils/db.server';
 import stylesUrl from '~/styles/login.css';
-import { login } from '~/utils/session.server';
+import { login, createUserSession } from '~/utils/session.server';
 
 export const links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
@@ -67,15 +67,18 @@ export const action: ActionFunction = async ({ request }) => {
     case 'login': {
       // login to get the user
       const user = await login({ username, password });
-      console.log({ user });
+
       // if there's no user, return the fields and a formError
       if (!user)
         return badRequest({
           fields,
           formError: 'Username/Password combination is incorrect',
         });
-      // if there is a user, create their session and redirect to /jokes
+
+      // if there is a user, create their session and redirect to /jokes (or wherever they wanted to go based on query param)
+      return createUserSession(user.id, redirectTo);
     }
+
     case 'register': {
       const userExists = await db.user.findFirst({
         where: { username },
