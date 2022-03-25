@@ -46,6 +46,7 @@ export default function JokesRoute() {
           {data.user ? (
             <div className="user-info">
               <span>{`Hi ${data.user.username}`}</span>
+              {/*if action is specified, uses it. otherwise, assumes this route has it*/}
               <form action="/logout" method="post">
                 <button type="submit" className="button">
                   Logout
