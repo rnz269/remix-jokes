@@ -1,4 +1,4 @@
-import type { ActionFunction, LoaderFunction } from 'remix';
+import type { ActionFunction, LoaderFunction, MetaFunction } from 'remix';
 import {
   useLoaderData,
   json,
@@ -13,6 +13,23 @@ import { db } from '~/utils/db.server';
 import { requireUserId, getUserId } from '~/utils/session.server';
 
 type LoaderData = { joke: Joke; isOwner: boolean };
+
+export const meta: MetaFunction = ({
+  data,
+}: {
+  data: LoaderData | undefined;
+}) => {
+  if (!data) {
+    return {
+      title: 'No joke',
+      description: 'No joke found',
+    };
+  }
+  return {
+    title: `"${data.joke.name}" joke`,
+    description: `Enjoy the "${data.joke.name}" joke and much more`,
+  };
+};
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   invariant(params.jokeId, 'expected params.jokeId');
