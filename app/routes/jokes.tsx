@@ -1,5 +1,5 @@
 import type { LinksFunction, LoaderFunction } from 'remix';
-import { json, Link, Outlet, useLoaderData } from 'remix';
+import { json, Link, Outlet, useLoaderData, Form } from 'remix';
 
 import { db } from '~/utils/db.server';
 import { getUser } from '~/utils/session.server';
@@ -46,11 +46,11 @@ export default function JokesRoute() {
             <div className="user-info">
               <span>{`Hi ${data.user.username}`}</span>
               {/*if action is specified, uses it. otherwise, assumes this route has it*/}
-              <form action="/logout" method="post">
+              <Form action="/logout" method="post">
                 <button type="submit" className="button">
                   Logout
                 </button>
-              </form>
+              </Form>
             </div>
           ) : (
             <Link to="/login">Login</Link>
