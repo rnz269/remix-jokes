@@ -8,7 +8,7 @@ type LoginForm = {
   password: string;
 };
 
-// define a function that accepts a username and password
+// directly used: login user and return id & username
 export async function login({ username, password }: LoginForm) {
   // first check if username exists.
   const user = await db.user.findUnique({
@@ -29,7 +29,7 @@ export async function login({ username, password }: LoginForm) {
   return { id: user.id, username };
 }
 
-// register user and return them
+// directly used: register user and return id & username
 export async function register({ username, password }: LoginForm) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
@@ -39,6 +39,7 @@ export async function register({ username, password }: LoginForm) {
   return { id: user.id, username };
 }
 
+// check secret is set
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set');
@@ -61,12 +62,12 @@ const storage = createCookieSessionStorage({
   },
 });
 
-// gets the cookie-session from the request
+// helper: gets the cookie-session from the request
 function getUserSession(request: Request) {
   return storage.getSession(request.headers.get('Cookie'));
 }
 
-// parses the cookie-session from the request, returning the userId or null if DNE
+// helper: parses the cookie-session from the request, returning the userId or null if DNE
 export async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get('userId');
@@ -75,7 +76,7 @@ export async function getUserId(request: Request) {
   return userId;
 }
 
-// requires that the request has the userId, returning userId or redirecting if DNE
+// directly used: requires that the request has the userId, returning userId or redirecting if DNE
 export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
@@ -93,7 +94,7 @@ export async function requireUserId(
   return userId;
 }
 
-// get info on the user
+// directly used: get userId from request's cookie, queries db for user's data, returns user data
 export async function getUser(request: Request) {
   const userId = await getUserId(request);
   if (typeof userId !== 'string') {
@@ -111,7 +112,7 @@ export async function getUser(request: Request) {
   }
 }
 
-// log out the user by destroying the cookie-session
+// directly used:log out the user by destroying the cookie-session
 export async function logout(request: Request) {
   const session = await getUserSession(request);
   return redirect('/login', {
@@ -121,7 +122,7 @@ export async function logout(request: Request) {
   });
 }
 
-// creates the cookie-session, storing the userId property in it
+// directly used: creates the cookie-session, storing the userId property in it
 export async function createUserSession(userId: string, redirectTo: string) {
   // get the SessionStorage object we created above in this file
   const session = await storage.getSession();

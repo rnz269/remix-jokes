@@ -1,6 +1,6 @@
-import type { ActionFunction } from 'remix';
-import { useActionData, redirect, json } from 'remix';
-import { requireUserId } from '~/utils/session.server';
+import type { ActionFunction, LoaderFunction } from 'remix';
+import { useActionData, redirect, json, useCatch, Link } from 'remix';
+import { getUserId, requireUserId } from '~/utils/session.server';
 
 import { db } from '~/utils/db.server';
 
@@ -15,6 +15,16 @@ function validateJokeName(name: string) {
     return `That joke's name is too short`;
   }
 }
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const userId = await getUserId(request);
+  if (!userId) {
+    throw new Response('You must be logged in to create a joke.', {
+      status: 401,
+    });
+  }
+  return json({});
+};
 
 type ActionData = {
   formError?: string;
@@ -31,11 +41,13 @@ type ActionData = {
 const badRequest = (data: ActionData) => json(data, { status: 400 });
 
 export const action: ActionFunction = async ({ request }) => {
+  // require that the user is signed in
   const userId = await requireUserId(request);
 
   const form = await request.formData();
   const name = form.get('name');
   const content = form.get('content');
+
   if (typeof name !== 'string' || typeof content !== 'string') {
     return badRequest({
       formError: `Form not submitted correctly.`,
@@ -121,6 +133,28 @@ export default function NewJokeRoute() {
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  console.log(caught);
+  if (caught.status === 401) {
+    return (
+      <div className="error-container">
+        <p>{caught.data}</p>
+        <Link to="/login">Login</Link>
+      </div>
+    );
+  }
+  throw new Error(`Unhandled error: ${caught.status}`);
+}
+
+export function ErrorBoundary() {
+  return (
+    <div className="error-container">
+      Something unexpected went wrong. Sorry about that.
     </div>
   );
 }

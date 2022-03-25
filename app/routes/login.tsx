@@ -3,7 +3,7 @@ import { useActionData, json, Link, useSearchParams } from 'remix';
 
 import { db } from '~/utils/db.server';
 import stylesUrl from '~/styles/login.css';
-import { login, createUserSession, register } from '~/utils/session.server';
+import { login, register, createUserSession } from '~/utils/session.server';
 
 export const links: LinksFunction = () => {
   return [{ rel: 'stylesheet', href: stylesUrl }];
